@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Your Name — Minimalist Portfolio">
+    <title>Your Name</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Victor+Mono:wght@400;500&display=swap');
+        
+        * {
+            font-family: 'Victor Mono', monospace;
+            font-size: 9pt !important;
+            line-height: 1.3;
+            font-weight: 400;
+        }
+        
+        .arrow {
+            font-size: 28pt !important;
+            line-height: 1;
+            font-weight: 300;
+        }
+        
+        *::-webkit-scrollbar { display: none; }
+        * { scrollbar-width: none; }
+
+        .project-card { transition: none; }
+
+        #detail-images {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1rem;
+        }
+
+        #detail-images .full          { grid-column: span 12; }
+        #detail-images .half          { grid-column: span 6; }
+        #detail-images .third         { grid-column: span 4; }
+        #detail-images .two-thirds    { grid-column: span 8; }
+        #detail-images .quarter       { grid-column: span 3; }
+        #detail-images .three-quarters{ grid-column: span 9; }
+
+        /* Same outline as thumbnails */
+        #detail-images img {
+            width: 100%;
+            height: auto;
+            border: 1px solid #e5e5e5;
+            display: block;
+        }
+
+        /* Auto Pan */
+        .auto-pan {
+            overflow-x: auto;
+            cursor: grab;
+            border: 1px solid #e5e5e5;
+            grid-column: span 12;
+        }
+
+        .auto-pan img {
+            width: auto !important;
+            max-width: none !important;
+            height: 420px !important;
+            display: block;
+            animation: autoPan 18s linear infinite;
+        }
+
+        @keyframes autoPan {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* MOBILE: Force full width */
+        @media (max-width: 768px) {
+            #detail-images .full,
+            #detail-images .half,
+            #detail-images .third,
+            #detail-images .two-thirds,
+            #detail-images .quarter,
+            #detail-images .three-quarters {
+                grid-column: span 12 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-white text-neutral-950 overflow-hidden h-screen">
+
+    <div class="flex flex-col md:flex-row h-full">
+        
+        <!-- LEFT PANEL -->
+        <div id="left-panel" class="w-full md:w-[25%] border-b md:border-b-0 md:border-r border-neutral-200 bg-white p-8 flex flex-col transition-all">
+            <div id="bio-view">
+                <div class="prose prose-neutral">
+                    <p class="mb-6">I create quiet, intentional digital work.</p>
+                    <p>Currently available for select freelance projects in 2026.</p>
+                </div>
+                <div class="mt-12">
+                    <a href="mailto:hello@yourname.com" class="inline-block border border-neutral-300 hover:border-black px-6 py-4 tracking-wider">
+                        HELLO@YOURNAME.COM →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div id="right-panel" class="flex-1 bg-neutral-50 overflow-auto relative flex flex-col h-full">
+            
+            <div id="projects-grid" class="flex-1 p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="thumbnail-container"></div>
+            </div>
+
+            <div id="project-detail" class="hidden flex-1 p-8 overflow-auto">
+                <button onclick="showBio()" class="arrow hover:text-neutral-500 mb-8">←</button>
+                
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <div id="project-title" class="text-3xl"></div>
+                        <div id="project-year" class="text-neutral-500"></div>
+                    </div>
+                </div>
+
+                <div id="detail-images"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentIndex = 0;
+
+        const projects = [
+            {
+                title: "RABBITX",
+                year: "2025",
+                desc: "Short one-line description",
+                thumbnail: "images/thumbnails/RABBITX.jpg",
+                images: [
+                    { src: "images/projects/RABBITX/01.jpg", layout: "half" },
+                    { src: "images/projects/RABBITX/02.png", layout: "half" },
+                    { src: "images/projects/RABBITX/03.png", layout: "half" },
+                    { src: "images/projects/RABBITX/05.png", layout: "half" },
+                    { src: "images/projects/RABBITX/06.png", layout: "half" }
+                ]
+            },
+            {
+                title: "QWEST",
+                year: "2024",
+                desc: "Short one-line description",
+                thumbnail: "images/thumbnails/QWEST.png",
+                images: [
+                    { src: "images/projects/QWEST/01.PNG", layout: "half" },
+                    { src: "images/projects/QWEST/02.JPG", layout: "half" },
+                    { src: "images/projects/QWEST/03.PNG", layout: "full", autoPan: true },
+                    { src: "images/projects/QWEST/04.JPeG", layout: "half" },
+                    { src: "images/projects/QWEST/05.gif", layout: "third" }
+                ]
+            },
+            {
+                title: "INTMAX",
+                year: "2025",
+                desc: "Short one-line description",
+                thumbnail: "images/thumbnails/INTMAX.png",
+                images: [
+                    { src: "images/projects/INTMAX/01.gif", layout: "half" },
+                    { src: "images/projects/INTMAX/02.gif", layout: "quarter" },
+		    { src: "images/projects/INTMAX/03.gif", layout: "quarter" },
+		    { src: "images/projects/INTMAX/04.png", layout: "third" },
+		    { src: "images/projects/INTMAX/05.png", layout: "third" },
+		    { src: "images/projects/INTMAX/06.png", layout: "third" },
+		    { src: "images/projects/INTMAX/07.png", layout: "third" }
+                ]
+            },
+            {
+                title: "SEQUENCE MARKETS",
+                year: "2025",
+                desc: "Short one-line description",
+                thumbnail: "images/thumbnails/SEQUENCE.png",
+                images: [
+                    { src: "images/projects/SEQUENCE/01.PNG", layout: "half" },
+                    { src: "images/projects/SEQUENCE/02.PNG", layout: "quarter" },
+                    { src: "images/projects/SEQUENCE/08.gif", layout: "quarter" },
+		    { src: "images/projects/SEQUENCE/03.PNG", layout: "half" },
+		    { src: "images/projects/SEQUENCE/04.PNG", layout: "quarter" },
+		    { src: "images/projects/SEQUENCE/06.PNG", layout: "quarter" },
+		    { src: "images/projects/SEQUENCE/05.PNG", layout: "half" },
+		    { src: "images/projects/SEQUENCE/07.gif", layout: "half" }
+
+                ]
+            },
+            {
+                title: "STORJ",
+                year: "2025",
+                desc: "Short one-line description",
+                thumbnail: "images/thumbnails/STORJ.png",
+                images: [
+                    { src: "images/projects/STORJ/01.PNG", layout: "half" },
+                    { src: "images/projects/STORJ/02.gif", layout: "third" },
+                    { src: "images/projects/STORJ/03.png", layout: "half" },
+		    { src: "images/projects/STORJ/04.png", layout: "half" }
+                ]
+            },
+            {
+                title: "POTTERY",
+                year: "2025",
+                desc: "Short one-line description",
+                thumbnail: "images/thumbnails/POTTERY.JPG",
+                images: [
+                    { src: "images/projects/POTTERY/01.jpg", layout: "third" },
+                    { src: "images/projects/POTTERY/02.jpg", layout: "third" },
+                    { src: "images/projects/POTTERY/03.jpg", layout: "third" },
+                    { src: "images/projects/POTTERY/04.jpg", layout: "third" },
+                    { src: "images/projects/POTTERY/05.jpg", layout: "third" }
+                ]
+            },
+            {
+                title: "STUFF",
+                year: "2025",
+                desc: "Short one-line description",
+                thumbnail: "images/thumbnails/STUFF.JPG",
+                images: [
+                    { src: "images/projects/STUFF/01.jpg", layout: "third" },
+                    { src: "images/projects/STUFF/02.JPG", layout: "half" },
+                    { src: "images/projects/STUFF/03.JPG", layout: "third" },
+                    
+                ]
+            }          
+        ];
+
+        function createThumbnails() {
+            const container = document.getElementById('thumbnail-container');
+            container.innerHTML = '';
+
+            projects.forEach((p, i) => {
+                const div = document.createElement('div');
+                div.className = "project-card cursor-pointer";
+                div.innerHTML = `
+                    <div class="aspect-video bg-white overflow-hidden border border-neutral-200">
+                        <img src="${p.thumbnail}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="font-medium">${p.title}</h3>
+                        <p class="text-neutral-600">${p.desc}</p>
+                    </div>
+                `;
+                div.onclick = () => openProject(i);
+                container.appendChild(div);
+            });
+        }
+
+        function showProject(index) {
+            const p = projects[index];
+            
+            document.getElementById('projects-grid').classList.add('hidden');
+            document.getElementById('project-detail').classList.remove('hidden');
+            document.getElementById('left-panel').classList.add('hidden', 'md:flex');
+
+            document.getElementById('project-title').textContent = p.title;
+            document.getElementById('project-year').textContent = p.year;
+
+            const container = document.getElementById('detail-images');
+            container.innerHTML = '';
+
+            p.images.forEach(img => {
+                const div = document.createElement('div');
+                
+                if (img.layout === "full") div.className = "full";
+                else if (img.layout === "half") div.className = "half";
+                else if (img.layout === "third") div.className = "third";
+                else if (img.layout === "two-thirds") div.className = "two-thirds";
+                else if (img.layout === "quarter") div.className = "quarter";
+                else if (img.layout === "three-quarters") div.className = "three-quarters";
+                else div.className = "full";
+
+                if (img.autoPan) div.className += ' auto-pan';
+
+                div.innerHTML = `<img src="${img.src}" alt="${p.title}">`;
+                container.appendChild(div);
+            });
+        }
+
+        function openProject(index) {
+            currentIndex = index;
+            showProject(index);
+        }
+
+        function showBio() {
+            document.getElementById('projects-grid').classList.remove('hidden');
+            document.getElementById('project-detail').classList.add('hidden');
+            document.getElementById('left-panel').classList.remove('hidden');
+        }
+
+        function prevProject() {
+            currentIndex = (currentIndex - 1 + projects.length) % projects.length;
+            showProject(currentIndex);
+        }
+
+        function nextProject() {
+            currentIndex = (currentIndex + 1) % projects.length;
+            showProject(currentIndex);
+        }
+
+        createThumbnails();
+    </script>
+</body>
+</html>
