@@ -263,38 +263,42 @@
 
         function showProject(index) {
             const p = projects[index];
-            
-            document.getElementById('projects-grid').classList.add('hidden');
-            document.getElementById('project-detail').classList.remove('hidden');
-            document.getElementById('left-panel').classList.add('hidden', 'md:flex');
 
-            document.getElementById('project-title').textContent = p.title;
-            document.getElementById('project-year').textContent = p.year;
+            requestAnimationFrame(() => {
+                document.getElementById('projects-grid').classList.add('hidden');
+                document.getElementById('left-panel').classList.add('hidden', 'md:flex');
 
-            const container = document.getElementById('detail-images');
-            container.innerHTML = '';
+                requestAnimationFrame(() => {
+                    document.getElementById('project-detail').classList.remove('hidden');
+                    document.getElementById('project-title').textContent = p.title;
+                    document.getElementById('project-year').textContent = p.year;
 
-            p.images.forEach(img => {
-                const div = document.createElement('div');
-                
-                if (img.layout === "full") div.className = "full";
-                else if (img.layout === "half") div.className = "half";
-                else if (img.layout === "third") div.className = "third";
-                else if (img.layout === "two-thirds") div.className = "two-thirds";
-                else if (img.layout === "quarter") div.className = "quarter";
-                else if (img.layout === "three-quarters") div.className = "three-quarters";
-                else div.className = "full";
+                    const container = document.getElementById('detail-images');
+                    container.innerHTML = '';
 
-                if (img.autoPan) div.className += ' auto-pan';
+                    p.images.forEach(img => {
+                        const div = document.createElement('div');
 
-                div.innerHTML = `<img src="${img.src}" alt="${p.title}">`;
-                container.appendChild(div);
+                        if (img.layout === "full") div.className = "full";
+                        else if (img.layout === "half") div.className = "half";
+                        else if (img.layout === "third") div.className = "third";
+                        else if (img.layout === "two-thirds") div.className = "two-thirds";
+                        else if (img.layout === "quarter") div.className = "quarter";
+                        else if (img.layout === "three-quarters") div.className = "three-quarters";
+                        else div.className = "full";
+
+                        if (img.autoPan) div.className += ' auto-pan';
+
+                        div.innerHTML = `<img src="${img.src}" alt="${p.title}" loading="lazy">`;
+                        container.appendChild(div);
+                    });
+                });
             });
         }
 
         function openProject(index) {
             currentIndex = index;
-            showProject(index);
+            requestAnimationFrame(() => showProject(index));
         }
 
         function showBio() {
