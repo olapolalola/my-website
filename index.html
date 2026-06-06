@@ -3,14 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portfolio</title>
+<link rel="icon" href="images/favicon1.svg" type="image/svg+xml">
+<title>port</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html { overflow-y: scroll; }
+  @import url('https://fonts.googleapis.com/css2?family=Victor+Mono:wght@400;500&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Victor Mono', monospace; }
+  html { overflow-y: scroll; color-scheme: light; }
   body {
     background:#fff;
     width:100vw;
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ctext x='12' y='17' font-size='20' font-family='serif' text-anchor='middle' fill='black'%3E*%3C/text%3E%3C/svg%3E") 12 12, auto;
+    cursor: default;
     min-height:100vh;
     overflow:hidden;
   }
@@ -34,16 +36,15 @@
     pointer-events:none;
     width:100%;
     height:100%;
-    object-fit:contain;
+    object-fit:cover;
   }
-
+  .thumb.settled img { object-fit:contain; }
 
   /* ── Project page ── */
   #project-page {
     display:none;
     min-height:100vh;
     padding:48px 0 80px;
-    cursor:default;
   }
   #project-page.visible { display:block; }
   #project-page-inner {
@@ -64,7 +65,6 @@
     padding:12px 16px;
     opacity:0.65;
   }
-
   #project-arrows { display:flex; gap:8px; }
   #prev-btn, #next-btn {
     font-size:14px;
@@ -73,31 +73,28 @@
     padding:12px 16px;
     opacity:0.5;
   }
-
   #prev-btn:disabled, #next-btn:disabled { opacity:0.15; cursor:default; }
   #project-gallery { display:flex; flex-direction:column; gap:4px; }
-
   .img-row { display:flex; gap:4px; width:100%; align-items:flex-start; }
-  .img-row .img-wrap { flex-shrink:1; min-width:0; overflow:hidden; background:#e8e8e8; opacity:0; transition:opacity 0.4s; }
+  .img-row .img-wrap { flex-shrink:1; min-width:0; overflow:hidden; background:transparent; opacity:0; transition:opacity 0.4s; outline:1px solid #efefef; }
   .img-row .img-wrap.loaded { opacity:1; }
   .img-row .img-wrap img {
     width:100%; height:auto; display:block;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: high-quality;
-    transform: translateZ(0);
-    will-change: transform;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
+    image-rendering: auto;
+    color-profile: sRGB;
+    filter: none;
   }
-  /* GIFs: scale down only, never up — preserves pixel accuracy */
   .img-row .img-wrap.is-gif img {
     width:auto; height:auto;
     max-width:100%;
     image-rendering: auto;
+    color-profile: sRGB;
+    filter: none;
   }
 
+  /* Auto-pan: fixed height container, image scrolls horizontally */
   .autopan-wrap {
-    width:100%; height:420px; overflow:hidden; position:relative; background:#e8e8e8;
+    width:100%; height:420px; overflow:hidden; position:relative; background:#e8e8e8; outline:1px solid #efefef;
     opacity:0; transition:opacity 0.4s;
   }
   .autopan-wrap.loaded { opacity:1; }
@@ -105,7 +102,6 @@
     height:100%; width:auto; max-width:none; display:block;
     animation:autoPan 18s linear infinite;
     image-rendering: high-quality;
-    -webkit-image-rendering: high-quality;
     transform: translateZ(0);
     will-change: transform;
     backface-visibility: hidden;
@@ -118,18 +114,7 @@
     .img-row .img-wrap { width:100% !important; }
     .autopan-wrap { height:200px; }
   }
-  .gal-img img {
-    width:100%; height:auto; display:block;
-    image-rendering: high-quality;
-    -webkit-image-rendering: high-quality;
-    transform: translateZ(0);
-    will-change: transform;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-  }
-
   @keyframes autoPan { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-
 
   /* ── Flash keyframes ── */
   @keyframes fadeInCard1  { 0%{opacity:0} 10%{opacity:0} 25%{opacity:.5} 50%{opacity:1} 100%{opacity:1} }
@@ -140,6 +125,33 @@
   @keyframes fadeInCard6  { 0%{opacity:0} 30%{opacity:0} 50%{opacity:.5} 80%{opacity:1} 100%{opacity:1} }
   @keyframes fadeInCard7  { 0%{opacity:0} 34%{opacity:0} 55%{opacity:.5} 86%{opacity:1} 100%{opacity:1} }
   .thumb.flying { animation: var(--fade-anim) var(--fly-dur) linear forwards; }
+
+  /* ── Contact form ── */
+  #contact {
+    position:absolute;
+    width:100%;
+    padding:80px 0 100px;
+  }
+  #contact-inner {
+    max-width:480px;
+    margin:0 auto;
+    padding:0 5vw;
+  }
+  .contact-input {
+    width:100%; border:none; border-bottom:1px solid #d4d4d4;
+    padding:12px 0; background:transparent; outline:none;
+    font-family:inherit; font-size:9pt; resize:none; display:block;
+    color:#000;
+  }
+  .contact-input:focus { border-bottom-color:#888; }
+  .contact-input::placeholder { color:#bbb; }
+  .contact-row { margin-bottom:20px; }
+  .contact-submit {
+    margin-top:32px; background:none; border:none; border-bottom:1px solid #000;
+    padding:10px 0; font-family:inherit; font-size:9pt;
+    cursor:pointer; letter-spacing:0.1em; color:#000;
+  }
+  #form-status { font-size:9pt; color:#a3a3a3; margin-top:8px; min-height:1em; }
 </style>
 </head>
 <body>
@@ -161,8 +173,17 @@
 
 <script>
 const PROJECTS = [
+  // ── Flash-only images (sequence only) ──
+  { flashOnly:true, w:280, h:280, cover:'images/thumbnails/flash-01.jpg' },
+  { flashOnly:true, w:280, h:280, cover:'images/thumbnails/flash-02.jpg' },
+  { flashOnly:true, w:280, h:280, cover:'images/thumbnails/flash-03.jpg' },
+  { flashOnly:true, w:280, h:280, cover:'images/thumbnails/flash-04.jpg' },
+  { flashOnly:true, w:280, h:280, cover:'images/thumbnails/flash-05.jpg' },
+  { flashOnly:true, w:280, h:280, cover:'images/thumbnails/flash-06.png' },
+
+  // ── Project thumbnails (clickable, scattered) ──
   {
-    id:0, w:280, h:200,
+    id:0, w:280, h:200, perRow:2,
     cover:'images/thumbnails/RABBITX.png',
     gallery:[
       {src:'images/projects/RABBITX/01.jpg'},
@@ -200,14 +221,13 @@ const PROJECTS = [
     id:3, w:190, h:250,
     cover:'images/thumbnails/SEQUENCE.png',
     gallery:[
-      {src:'images/projects/SEQUENCE/01.png'},
+      {src:'images/projects/SEQUENCE/01.gif'},
       {src:'images/projects/SEQUENCE/02.png'},
       {src:'images/projects/SEQUENCE/08.gif'},
       {src:'images/projects/SEQUENCE/03.png'},
       {src:'images/projects/SEQUENCE/04.png'},
-      {src:'images/projects/SEQUENCE/06.png'},
       {src:'images/projects/SEQUENCE/05.png'},
-      {src:'images/projects/SEQUENCE/07.gif'},
+      {src:'images/projects/SEQUENCE/06.png'},
     ]
   },
   {
@@ -221,7 +241,7 @@ const PROJECTS = [
     ]
   },
   {
-    id:5, w:220, h:290,
+    id:5, w:220, h:290, perRow:3,
     cover:'images/thumbnails/POTTERY.jpg',
     gallery:[
       {src:'images/projects/POTTERY/01.jpg'},
@@ -241,6 +261,9 @@ const PROJECTS = [
     ]
   },
 ];
+
+const flashOnlyItems = PROJECTS.filter(p => p.flashOnly);
+const projectItems   = PROJECTS.filter(p => !p.flashOnly);
 
 // ── WebGL ──
 (function() {
@@ -283,12 +306,14 @@ const PROJECTS = [
 })();
 
 // ── Constants ──
-const FLASH_SCALE = 0.62;
+const FLASH_SCALE = 0.55;
+const THUMB_SCALE = 0.8;
 const MAX_THUMB   = 380;
 const MOBILE_BP   = 900;
+const LAST_PAUSE  = 200;
 let scattered = false;
 let homeScrollY = 0;
-const getCX = () => innerWidth  / 2;
+const getCX = () => innerWidth / 2;
 const getCY = () => innerHeight / 2;
 
 function naturalSize(nw, nh) {
@@ -296,18 +321,59 @@ function naturalSize(nw, nh) {
   return { w: Math.round(nw * s), h: Math.round(nh * s) };
 }
 
+function makeSizedEl(coverSrc, pw, ph, clickable, scale) {
+  scale = scale || FLASH_SCALE;
+  const el = document.createElement('div');
+  el.className = 'thumb';
+  const fw = Math.round(pw * scale);
+  const fh = Math.round(ph * scale);
+  el.style.width   = fw + 'px';
+  el.style.height  = fh + 'px';
+  el.style.left    = (getCX() - fw/2) + 'px';
+  el.style.top     = (getCY() - fh/2) + 'px';
+  el.style.opacity = '0';
+  if (!clickable) el.style.pointerEvents = 'none';
+  const img = document.createElement('img');
+  img.alt = '';
+  img.onload = () => {
+    const { w, h } = naturalSize(img.naturalWidth, img.naturalHeight);
+    el.dataset.nw = w;
+    el.dataset.nh = h;
+    if (!scattered) {
+      const side = Math.min(w, h);
+      const fw2 = Math.round((w * 0.3 + side * 0.7) * scale);
+      const fh2 = Math.round((h * 0.3 + side * 0.7) * scale);
+      el.style.width  = fw2 + 'px';
+      el.style.height = fh2 + 'px';
+      el.style.left   = (getCX() - fw2/2) + 'px';
+      el.style.top    = (getCY() - fh2/2) + 'px';
+    }
+  };
+  img.src = coverSrc;
+  el.appendChild(img);
+  document.body.appendChild(el);
+  return el;
+}
+
+const flashEls = flashOnlyItems.map(p => makeSizedEl(p.cover, p.w, p.h, false));
+const cards = projectItems.map((p) => {
+  const el = makeSizedEl(p.cover, p.w, p.h, true, THUMB_SCALE);
+  el.addEventListener('click', () => openProject(p.id));
+  return { el, p };
+});
+
 // ── Place cards ──
 function placeCards(naturalDims) {
   const vw  = innerWidth;
   const gap = 80;
-  const maxCardW = Math.max(...PROJECTS.map(p => p.w));
+  const maxCardW = Math.max(...projectItems.map(p => p.w));
   const vscale = Math.min(1, (vw - gap * 2) / maxCardW);
 
   if (vw < MOBILE_BP) {
     const mEdge = 8, mGap = 48, mTop = 80;
     const ms = Math.min(1, (vw - mEdge * 2) / maxCardW);
     let y = mTop;
-    const pos = PROJECTS.map((p, i) => {
+    const pos = projectItems.map((p, i) => {
       const nd = naturalDims && naturalDims[i];
       const w = nd ? nd.w : Math.floor(p.w * ms);
       const h = nd ? nd.h : Math.floor(p.h * ms);
@@ -318,97 +384,69 @@ function placeCards(naturalDims) {
     return { positions: pos, totalHeight: y + mGap, vscale: ms };
   }
 
-  // Layout: 2-column zigzag. Each card gets its own vertical band.
-  // Odd-indexed cards go left half, even go right half (or vice versa),
-  // with random x within that half and random y within the band.
-  // This prevents vertical stacking and keeps layout balanced.
-  const MAX_SITE_W = 1400; // max layout width
+  const MAX_SITE_W = 1400;
   const layoutW = Math.min(vw, MAX_SITE_W);
-  const n = PROJECTS.length;
+  const n = projectItems.length;
   const totalHeight = Math.ceil(innerHeight * 2.8);
-  const topPad = 120;  // space before first card
-  const botPad = 120;  // space after last card
+  const topPad = 120, botPad = 120;
   const bandH = Math.floor((totalHeight - topPad - botPad) / n);
   const halfW = Math.floor(layoutW / 2);
-  const xOffset = Math.floor((vw - layoutW) / 2); // centre the layout
+  const xOffset = Math.floor((vw - layoutW) / 2);
   const positions = [];
 
   for (let i = 0; i < n; i++) {
-    const p = PROJECTS[i];
+    const p = projectItems[i];
     const nd = naturalDims && naturalDims[i];
     const w = nd ? nd.w : Math.floor(p.w * vscale);
     const h = nd ? nd.h : Math.floor(p.h * vscale);
-
-    // Alternate columns: even = left half, odd = right half
     const col = i % 2;
     const xMin = xOffset + (col === 0 ? gap : halfW + gap);
     const xMax = xOffset + (col === 0 ? halfW - w - gap : layoutW - w - gap);
-    // Base x within column, plus a small random cross-column nudge
     const nudge = (Math.random() - 0.5) * halfW * 0.18;
     const x = xMin + Math.random() * Math.max(1, xMax - xMin) + nudge;
-
-    // Vertical band for this card
     const yMin = topPad + i * bandH + gap;
     const yMax = Math.max(yMin + 1, topPad + (i + 1) * bandH - h - gap);
     const y = yMin + Math.random() * Math.max(1, yMax - yMin);
-
     positions.push({
       x: Math.max(xOffset + gap, Math.min(xOffset + layoutW - w - gap, x)),
       y: Math.max(gap, Math.min(totalHeight - h - gap, y))
     });
   }
-
   return { positions, totalHeight, vscale };
 }
 
-// ── Create cards ──
-const cards = PROJECTS.map((p) => {
-  const el = document.createElement('div');
-  el.className = 'thumb';
-  const fw = Math.round(p.w * FLASH_SCALE);
-  const fh = Math.round(p.h * FLASH_SCALE);
-  el.style.width   = fw + 'px';
-  el.style.height  = fh + 'px';
-  el.style.left    = (getCX() - fw/2) + 'px';
-  el.style.top     = (getCY() - fh/2) + 'px';
-  el.style.opacity = '0';
-
-  const img = document.createElement('img');
-  img.alt = '';
-  img.onload = () => {
-    const { w, h } = naturalSize(img.naturalWidth, img.naturalHeight);
-    el.dataset.nw = w;
-    el.dataset.nh = h;
-    if (!scattered) {
-      const fw2 = Math.round(w * FLASH_SCALE);
-      const fh2 = Math.round(h * FLASH_SCALE);
-      el.style.width  = fw2 + 'px';
-      el.style.height = fh2 + 'px';
-      el.style.left   = (getCX() - fw2/2) + 'px';
-      el.style.top    = (getCY() - fh2/2) + 'px';
-    }
-  };
-  img.src = p.cover;
-  el.appendChild(img);
-
-
-
-  el.addEventListener('click', () => openProject(p.id));
-  document.body.appendChild(el);
-  return { el, p };
-});
-
 // ── Flash ──
 function runFlash(onDone) {
-  const order = cards.map((_,i) => i).sort((a,b) => b-a);
+  const foOrder = flashEls.map((_,i) => i);
+  const projOrder = cards.map((_,i) => i).filter(i => cards[i].p.id !== 0);
+  for (let i = projOrder.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [projOrder[i],projOrder[j]] = [projOrder[j],projOrder[i]];
+  }
+  const lastProjIdx = cards.findIndex(c => c.p.id === 0);
+  projOrder.push(lastProjIdx);
+
+  const allEls = [...flashEls, ...cards.map(c => c.el)];
+  const sequence = [
+    ...foOrder,
+    ...projOrder.map(i => flashEls.length + i)
+  ];
+
   let idx = 0;
-  const INTERVAL = 180;
+  function getDuration(i) { return 200; }
+
   function flash() {
-    if (idx >= order.length) { setTimeout(() => onDone({ lastIdx: order[idx-1] }), 500); return; }
-    cards.forEach(c => c.el.style.opacity = '0');
-    cards[order[idx]].el.style.opacity = '1';
+    if (idx >= sequence.length) {
+      setTimeout(() => {
+        flashEls.forEach(el => { el.style.opacity='0'; el.style.display='none'; });
+        onDone({ lastIdx: lastProjIdx });
+      }, LAST_PAUSE);
+      return;
+    }
+    allEls.forEach(el => el.style.opacity = '0');
+    allEls[sequence[idx]].style.opacity = '1';
     idx++;
-    setTimeout(flash, INTERVAL);
+    setTimeout(flash, getDuration(idx));
   }
   setTimeout(flash, 400);
 }
@@ -438,10 +476,14 @@ function flyOut(lastIdx) {
 
     const curLeft = parseFloat(el.style.left);
     const curTop  = parseFloat(el.style.top);
+    const curW    = parseFloat(el.style.width);
+    const curH    = parseFloat(el.style.height);
     el.style.transition = 'none';
     el.style.position   = 'absolute';
     el.style.left       = curLeft + 'px';
     el.style.top        = (curTop + scrollY) + 'px';
+    el.style.width      = curW + 'px';
+    el.style.height     = curH + 'px';
 
     setTimeout(() => {
       el.style.transition = [
@@ -455,7 +497,6 @@ function flyOut(lastIdx) {
         el.style.setProperty('--fade-anim', `fadeInCard${i+1}`);
         el.classList.add('flying');
       }
-      // Round to integer pixels to avoid subpixel jitter at rest
       el.style.left   = Math.round(fx) + 'px';
       el.style.top    = Math.round(fy) + 'px';
       el.style.width  = Math.round(natW) + 'px';
@@ -465,12 +506,32 @@ function flyOut(lastIdx) {
         el.style.transition = 'none';
         el.style.opacity    = '1';
         el.classList.remove('flying');
+        el.classList.add('settled');
         el.style.left   = Math.round(fx) + 'px';
         el.style.top    = Math.round(fy) + 'px';
       }, (DURATION * 1000) + delay + 80);
     }, delay);
   });
   scattered = true;
+
+  setTimeout(() => {
+    const th = parseFloat(document.body.style.height) || document.body.scrollHeight;
+    const contactEl = document.createElement('div');
+    contactEl.id = 'contact';
+    contactEl.style.cssText = 'position:absolute;top:' + th + 'px;width:100%;opacity:0;transition:opacity 1s ease;';
+    contactEl.innerHTML = `
+      <div id="contact-inner">
+        <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
+        <div class="contact-row"><input type="text" id="contact-name" class="contact-input" placeholder="name *"></div>
+        <div class="contact-row"><input type="text" id="contact-details" class="contact-input" placeholder="email / phone / @"></div>
+        <div class="contact-row"><textarea id="contact-message" class="contact-input" rows="4" placeholder="message *"></textarea></div>
+        <button class="contact-submit" onclick="sendMessage()">send →</button>
+        <p id="form-status"></p>
+      </div>`;
+    document.body.appendChild(contactEl);
+    document.body.style.height = (th + contactEl.offsetHeight) + 'px';
+    requestAnimationFrame(() => requestAnimationFrame(() => { contactEl.style.opacity = '1'; }));
+  }, 3200 + (cards.length * 60) + 400);
 }
 
 // ── Resize reflow ──
@@ -513,23 +574,29 @@ const nextBtn     = document.getElementById('next-btn');
 
 function updateArrows(id) {
   prevBtn.disabled = id <= 0;
-  nextBtn.disabled = id >= PROJECTS.length - 1;
+  nextBtn.disabled = id >= projectItems.length - 1;
 }
 
 prevBtn.addEventListener('click', () => {
   if (currentProjectId > 0) openProject(currentProjectId - 1);
 });
 nextBtn.addEventListener('click', () => {
-  if (currentProjectId < PROJECTS.length - 1) openProject(currentProjectId + 1);
+  if (currentProjectId < projectItems.length - 1) openProject(currentProjectId + 1);
 });
 
 function showHome() {
   projectPage.classList.remove('visible');
   document.getElementById('glCanvas').style.display = '';
   cards.forEach(c => c.el.style.display = '');
-  document.body.style.cursor = 'crosshair';
-  document.body.style.height = '';
-  // Restore body height then scroll to where user was
+  if (scattered) {
+    const ce = document.getElementById('contact');
+    if (ce) {
+      const naturalDims2 = cards.map(({el,p}) => el.dataset.nw ? {w:parseInt(el.dataset.nw),h:parseInt(el.dataset.nh)} : null);
+      const { totalHeight: th2 } = placeCards(naturalDims2);
+      ce.style.top = th2 + 'px';
+      ce.style.display = 'block';
+    }
+  }
   const naturalDims = cards.map(({el,p}) => el.dataset.nw ? {w:parseInt(el.dataset.nw),h:parseInt(el.dataset.nh)} : null);
   const { totalHeight } = placeCards(naturalDims);
   document.body.style.height = totalHeight + 'px';
@@ -537,96 +604,114 @@ function showHome() {
 }
 
 function showProject(id) {
-  const p = PROJECTS[id];
+  const p = projectItems.find(p => p.id === id);
   if (!p) return;
   currentProjectId = id;
   updateArrows(id);
   document.getElementById('glCanvas').style.display = 'none';
   cards.forEach(c => c.el.style.display = 'none');
-  document.body.style.cursor = 'default';
+  const ce = document.getElementById('contact'); if (ce) ce.style.display = 'none';
   document.body.style.height = 'auto';
-  if (history.scrollRestoration) history.scrollRestoration = "manual";
-window.scrollTo(0, 0);
-
+  window.scrollTo(0, 0);
   gallery.innerHTML = '';
 
-  // Load natural ratios then group into rows (from original layout logic)
-  function loadRatio(item) {
-    return new Promise(resolve => {
-      if (item.autoPan) return resolve({ ...item, ratio: 999 });
-      const img = new Image();
-      img.onload  = () => resolve({ ...item, ratio: img.naturalWidth / img.naturalHeight });
-      img.onerror = () => resolve({ ...item, ratio: 16/9 });
-      img.src = item.src;
-    });
-  }
-
-  function groupIntoRows(items) {
+  function groupIntoRows(items, perRow) {
     const rows = [];
     let i = 0;
     while (i < items.length) {
       const item = items[i];
-      if (item.autoPan || item.ratio > 3) { rows.push([item]); i++; continue; }
-      if (item.ratio > 2) {
-        const next = items[i+1];
-        if (next && !next.autoPan && next.ratio <= 3) { rows.push([item, next]); i+=2; }
-        else { rows.push([item]); i++; }
-        continue;
+      // autoPan always gets its own row
+      if (item.autoPan) { rows.push([item]); i++; continue; }
+      // Use perRow if set, otherwise default to 2 minimum, 3 maximum
+      const max = perRow || 3;
+      const min = perRow || 2;
+      let count = Math.min(max, items.length - i);
+      // Don't pull an autoPan into a multi-item row
+      for (let k = 1; k < count; k++) {
+        if (items[i + k] && items[i + k].autoPan) { count = k; break; }
       }
-      let count = Math.min(3, items.length - i);
-      if (count === 3) {
-        const third = items[i+2];
-        if (third && (third.autoPan || third.ratio > 2)) count = 2;
-      }
+      // Single leftover: allow it as its own row with empty space beside it
       rows.push(items.slice(i, i + count));
       i += count;
-    }
-    // Fix solo non-wide rows
-    for (let j = 0; j < rows.length; j++) {
-      const row = rows[j];
-      if (row.length === 1 && !row[0].autoPan && row[0].ratio <= 3 && j > 0) {
-        const prev = rows[j-1];
-        const prevMax = prev.some(it => it.ratio > 2) ? 2 : 3;
-        const prevSolo = prev.length === 1 && (prev[0].autoPan || prev[0].ratio > 3);
-        if (!prevSolo && prev.length < prevMax) { prev.push(row[0]); rows.splice(j,1); j--; }
-        else if (!prevSolo && prev.length >= 2) { const moved = prev.pop(); rows[j] = [moved, row[0]]; }
-      }
     }
     return rows;
   }
 
-  Promise.all(p.gallery.map(loadRatio)).then(items => {
-    const rows = groupIntoRows(items);
-    rows.forEach(row => {
-      if (row.length === 1 && row[0].autoPan) {
-        const wrap = document.createElement('div');
-        wrap.className = 'autopan-wrap';
-        const img = document.createElement('img');
-        img.src = row[0].src; img.alt = ''; img.decoding = 'sync';
-        img.onload = () => wrap.classList.add('loaded');
-        wrap.appendChild(img);
-        gallery.appendChild(wrap);
-        return;
-      }
-      const rowEl = document.createElement('div');
-      rowEl.className = 'img-row';
-      const totalRatio = row.reduce((s, it) => s + it.ratio, 0);
-      row.forEach(item => {
-        const wrap = document.createElement('div');
-        const isGif = item.src.toLowerCase().endsWith('.gif');
-        wrap.className = 'img-wrap' + (isGif ? ' is-gif' : '');
+  function renderRow(row) {
+    if (row.length === 1 && row[0].autoPan) {
+      const wrap = document.createElement('div');
+      wrap.className = 'autopan-wrap';
+      const img = document.createElement('img');
+      img.src = row[0].src; img.alt = ''; img.decoding = 'sync';
+      img.onload = () => wrap.classList.add('loaded');
+      wrap.appendChild(img);
+      gallery.appendChild(wrap);
+      return;
+    }
+    const rowEl = document.createElement('div');
+    rowEl.className = 'img-row';
+    const totalRatio = row.reduce((s, it) => s + it.ratio, 0);
+    row.forEach(item => {
+      const wrap = document.createElement('div');
+      const isGif = item.src.toLowerCase().endsWith('.gif');
+      wrap.className = 'img-wrap' + (isGif ? ' is-gif' : '');
+      let wrapWidth;
+      if (row.length === 1) {
+        // Solo image: roughly 1/3 of the row width
+        wrapWidth = `40%`;
+      } else {
         const pct = (item.ratio / totalRatio) * 100;
         const gapShare = (row.length - 1) * 4 / row.length;
-        wrap.style.width = `calc(${pct}% - ${gapShare}px)`;
-        const img = document.createElement('img');
-        img.src = item.src; img.alt = ''; img.decoding = 'sync'; img.loading = 'lazy';
-        img.onload = () => wrap.classList.add('loaded');
-        wrap.appendChild(img);
-        rowEl.appendChild(wrap);
-      });
-      gallery.appendChild(rowEl);
+        wrapWidth = `calc(${pct}% - ${gapShare}px)`;
+      }
+      wrap.style.width = wrapWidth;
+      const img = document.createElement('img');
+      img.src = item.src; img.alt = ''; img.decoding = 'sync'; img.loading = 'lazy';
+      img.onload = () => wrap.classList.add('loaded');
+      wrap.appendChild(img);
+      rowEl.appendChild(wrap);
     });
-  });
+    gallery.appendChild(rowEl);
+  }
+
+  const collected = [];
+  let renderedCount = 0;
+
+  function tryRenderRows(final) {
+    const rows = groupIntoRows(collected.slice(renderedCount), p.perRow);
+    const toRender = final ? rows : rows.slice(0, rows.length - 1);
+    toRender.forEach(row => {
+      renderRow(row);
+      renderedCount += row.length;
+    });
+  }
+
+  function loadNext(idx) {
+    if (idx >= p.gallery.length) {
+      tryRenderRows(true);
+      return;
+    }
+    const item = p.gallery[idx];
+    if (item.autoPan) {
+      collected.push({ ...item, ratio: 999 });
+      tryRenderRows(false);
+      loadNext(idx + 1);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      collected.push({ ...item, ratio: img.naturalWidth / img.naturalHeight });
+      tryRenderRows(false);
+      loadNext(idx + 1);
+    };
+    img.onerror = () => {
+      collected.push({ ...item, ratio: 16/9 });
+      tryRenderRows(false);
+      loadNext(idx + 1);
+    };
+    img.src = item.src;
+  }
+  loadNext(0);
 
   projectPage.classList.add('visible');
 }
@@ -640,9 +725,8 @@ function openProject(id) {
 backBtn.addEventListener('click', () => { history.pushState(null, '', location.pathname); showHome(); });
 
 window.addEventListener('popstate', (e) => {
-  if (e.state && e.state.project !== undefined) {
-    showProject(e.state.project);
-  } else {
+  if (e.state && e.state.project !== undefined) showProject(e.state.project);
+  else {
     if (e.state && e.state.scrollY !== undefined) homeScrollY = e.state.scrollY;
     showHome();
   }
@@ -655,12 +739,57 @@ function checkURL() {
   return false;
 }
 
-if (history.scrollRestoration) history.scrollRestoration = "manual";
+// ── Contact form ──
+let lastSubmit = 0;
+const RATE_LIMIT_MS = 60000;
+
+async function sendMessage() {
+  const honeypot = document.querySelector('input[name="_gotcha"]');
+  if (honeypot && honeypot.value) return;
+
+  const now = Date.now();
+  const status = document.getElementById('form-status');
+
+  if (now - lastSubmit < RATE_LIMIT_MS) {
+    const wait = Math.ceil((RATE_LIMIT_MS - (now - lastSubmit)) / 1000);
+    status.textContent = `Please wait ${wait}s before sending again.`;
+    return;
+  }
+
+  const name    = document.getElementById('contact-name').value.trim();
+  const details = document.getElementById('contact-details').value.trim();
+  const message = document.getElementById('contact-message').value.trim();
+
+  if (!name || !details || !message) return;
+
+  try {
+    const res = await fetch('https://formspree.io/f/xzdwedeq', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ name, contact: details, message })
+    });
+    if (res.ok) {
+      lastSubmit = Date.now();
+      document.getElementById('contact-name').value = '';
+      document.getElementById('contact-details').value = '';
+      document.getElementById('contact-message').value = '';
+      status.textContent = 'Message sent!';
+      setTimeout(() => status.textContent = '', 3000);
+    } else {
+      status.textContent = 'Something went wrong. Try again.';
+    }
+  } catch(e) {
+    status.textContent = 'Something went wrong. Try again.';
+  }
+}
+
+if (history.scrollRestoration) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
 
 if (!checkURL()) {
   runFlash(({ lastIdx }) => requestAnimationFrame(() => flyOut(lastIdx)));
 }
 </script>
+
 </body>
 </html>
