@@ -1,317 +1,666 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Design Port">
-    <title>Design Port</title>
-    <link rel="icon" href="images/favicon.jpg" type="image/jpg">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Victor+Mono:wght@400;500&display=swap');
-        
-        * {
-            font-family: 'Victor Mono', monospace;
-            font-size: 9pt !important;
-            line-height: 1.3;
-            font-weight: 400;
-        }
-        
-        .arrow {
-            font-size: 28pt !important;
-            line-height: 1;
-            font-weight: 300;
-        }
-        
-        *::-webkit-scrollbar { display: none; }
-        * { scrollbar-width: none; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { overflow-y: scroll; }
+  body {
+    background:#fff;
+    width:100vw;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ctext x='12' y='17' font-size='20' font-family='serif' text-anchor='middle' fill='black'%3E*%3C/text%3E%3C/svg%3E") 12 12, auto;
+    min-height:100vh;
+    overflow:hidden;
+  }
+  body.scrollable { overflow:visible; }
 
-        .project-card { transition: none; }
+  #glCanvas {
+    position:fixed; top:0; left:0;
+    width:100%; height:100%;
+    pointer-events:none; z-index:0;
+  }
+  .thumb {
+    position:fixed;
+    z-index:10;
+    cursor:pointer;
+    opacity:0;
+    line-height:0;
+    will-change:left,top,width,height,opacity;
+  }
+  .thumb img {
+    display:block;
+    pointer-events:none;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
 
-        /* Optimized for large thumbnails */
-        .thumbnail-container {
-            aspect-ratio: 16 / 9;
-            overflow: hidden;
-            border: 1px solid #e5e5e5;
-            background: white;
-        }
 
-        .thumbnail-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            image-rendering: high-quality;
-            -webkit-image-rendering: high-quality;
-            transform: translateZ(0);
-            will-change: transform;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
+  /* ── Project page ── */
+  #project-page {
+    display:none;
+    min-height:100vh;
+    padding:48px 0 80px;
+    cursor:default;
+  }
+  #project-page.visible { display:block; }
+  #project-page-inner {
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 5vw;
+  }
+  #project-nav {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:24px;
+  }
+  #back-btn {
+    font-size:14px;
+    color:#000; cursor:pointer;
+    background:none; border:none;
+    padding:12px 16px;
+    opacity:0.65;
+  }
 
-        #detail-images {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: 1rem;
-        }
+  #project-arrows { display:flex; gap:8px; }
+  #prev-btn, #next-btn {
+    font-size:14px;
+    color:#000; cursor:pointer;
+    background:none; border:none;
+    padding:12px 16px;
+    opacity:0.5;
+  }
 
-        #detail-images .full          { grid-column: span 12; }
-        #detail-images .half          { grid-column: span 6; }
-        #detail-images .third         { grid-column: span 4; }
-        #detail-images .two-thirds    { grid-column: span 8; }
-        #detail-images .quarter       { grid-column: span 3; }
-        #detail-images .three-quarters{ grid-column: span 9; }
+  #prev-btn:disabled, #next-btn:disabled { opacity:0.15; cursor:default; }
+  #project-gallery { display:flex; flex-direction:column; gap:4px; }
 
-        #detail-images img {
-            width: 100%;
-            height: auto;
-            border: 1px solid #e5e5e5;
-            display: block;
-        }
+  .img-row { display:flex; gap:4px; width:100%; align-items:flex-start; }
+  .img-row .img-wrap { flex-shrink:1; min-width:0; overflow:hidden; background:#e8e8e8; opacity:0; transition:opacity 0.4s; }
+  .img-row .img-wrap.loaded { opacity:1; }
+  .img-row .img-wrap img {
+    width:100%; height:auto; display:block;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: high-quality;
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  /* GIFs: scale down only, never up — preserves pixel accuracy */
+  .img-row .img-wrap.is-gif img {
+    width:auto; height:auto;
+    max-width:100%;
+    image-rendering: auto;
+  }
 
-        /* Auto Pan */
-        .auto-pan {
-            overflow-x: auto;
-            cursor: grab;
-            border: 1px solid #e5e5e5;
-            grid-column: span 12;
-        }
+  .autopan-wrap {
+    width:100%; height:420px; overflow:hidden; position:relative; background:#e8e8e8;
+    opacity:0; transition:opacity 0.4s;
+  }
+  .autopan-wrap.loaded { opacity:1; }
+  .autopan-wrap img {
+    height:100%; width:auto; max-width:none; display:block;
+    animation:autoPan 18s linear infinite;
+    image-rendering: high-quality;
+    -webkit-image-rendering: high-quality;
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    image-rendering: -webkit-optimize-contrast;
+  }
 
-        .auto-pan img {
-            width: auto !important;
-            max-width: none !important;
-            height: 420px !important;
-            display: block;
-            animation: autoPan 18s linear infinite;
-        }
+  @media (max-width:768px) {
+    .img-row { flex-direction:column; }
+    .img-row .img-wrap { width:100% !important; }
+    .autopan-wrap { height:200px; }
+  }
+  .gal-img img {
+    width:100%; height:auto; display:block;
+    image-rendering: high-quality;
+    -webkit-image-rendering: high-quality;
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
 
-        @keyframes autoPan {
-            0%   { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
+  @keyframes autoPan { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
 
-        @media (max-width: 768px) {
-            #detail-images .full,
-            #detail-images .half,
-            #detail-images .third,
-            #detail-images .two-thirds,
-            #detail-images .quarter,
-            #detail-images .three-quarters {
-                grid-column: span 12 !important;
-            }
-        }
-    </style>
+
+  /* ── Flash keyframes ── */
+  @keyframes fadeInCard1  { 0%{opacity:0} 10%{opacity:0} 25%{opacity:.5} 50%{opacity:1} 100%{opacity:1} }
+  @keyframes fadeInCard2  { 0%{opacity:0} 14%{opacity:0} 30%{opacity:.5} 56%{opacity:1} 100%{opacity:1} }
+  @keyframes fadeInCard3  { 0%{opacity:0} 18%{opacity:0} 35%{opacity:.5} 62%{opacity:1} 100%{opacity:1} }
+  @keyframes fadeInCard4  { 0%{opacity:0} 22%{opacity:0} 40%{opacity:.5} 68%{opacity:1} 100%{opacity:1} }
+  @keyframes fadeInCard5  { 0%{opacity:0} 26%{opacity:0} 45%{opacity:.5} 74%{opacity:1} 100%{opacity:1} }
+  @keyframes fadeInCard6  { 0%{opacity:0} 30%{opacity:0} 50%{opacity:.5} 80%{opacity:1} 100%{opacity:1} }
+  @keyframes fadeInCard7  { 0%{opacity:0} 34%{opacity:0} 55%{opacity:.5} 86%{opacity:1} 100%{opacity:1} }
+  .thumb.flying { animation: var(--fade-anim) var(--fly-dur) linear forwards; }
+</style>
 </head>
-<body class="bg-white text-neutral-950 overflow-hidden h-screen">
+<body>
 
-    <div class="flex flex-col md:flex-row h-full">
-        <!-- LEFT PANEL -->
-        <div id="left-panel" class="w-full md:w-[25%] border-b md:border-b-0 md:border-r border-neutral-200 bg-white p-8 flex flex-col transition-all">
-            <div id="bio-view">
-                <div class="prose prose-neutral">
-                    <p class="mb-8">Graphic Designer</p>   <!-- Changed from mb-6 to mb-8 -->
-                </div>
-                <div class="mt-8">                        <!-- Changed from mt-12 to mt-8 -->
-                    <a href="mailto:o.rushton@outlook.com" class="inline-block border border-neutral-300 px-6 py-4 tracking-wider">
-                        O.RUSHTON@OUTLOOK.COM →
-                    </a>
-                </div>
-            </div>
-        </div>
+<canvas id="glCanvas"></canvas>
 
-        <!-- RIGHT PANEL -->
-        <div id="right-panel" class="flex-1 bg-neutral-50 overflow-auto relative flex flex-col h-full">
-            
-            <div id="projects-grid" class="flex-1 p-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="thumbnail-container"></div>
-            </div>
-
-            <div id="project-detail" class="hidden flex-1 p-8 overflow-auto">
-                <button onclick="showBio()" class="arrow mb-8">←</button>
-                
-                <div class="flex justify-between items-center mb-8">
-                    <div>
-                        <div id="project-title" class="text-3xl"></div>
-                        <div id="project-year" class="text-neutral-500"></div>
-                    </div>
-                </div>
-
-                <div id="detail-images"></div>
-            </div>
-        </div>
+<div id="project-page">
+  <div id="project-page-inner">
+    <div id="project-nav">
+      <button id="back-btn">✕</button>
+      <div id="project-arrows">
+        <button id="prev-btn">←</button>
+        <button id="next-btn">→</button>
+      </div>
     </div>
+    <div id="project-gallery"></div>
+  </div>
+</div>
 
-    <script>
-        let currentIndex = 0;
+<script>
+const PROJECTS = [
+  {
+    id:0, w:280, h:200,
+    cover:'images/thumbnails/RABBITX.png',
+    gallery:[
+      {src:'images/projects/RABBITX/01.jpg'},
+      {src:'images/projects/RABBITX/02.png'},
+      {src:'images/projects/RABBITX/03.png'},
+      {src:'images/projects/RABBITX/05.png'},
+      {src:'images/projects/RABBITX/06.png'},
+    ]
+  },
+  {
+    id:1, w:210, h:270,
+    cover:'images/thumbnails/QWEST.png',
+    gallery:[
+      {src:'images/projects/QWEST/01.png'},
+      {src:'images/projects/QWEST/02.jpg'},
+      {src:'images/projects/QWEST/03.png', autoPan:true},
+      {src:'images/projects/QWEST/04.jpg'},
+      {src:'images/projects/QWEST/05.gif'},
+    ]
+  },
+  {
+    id:2, w:320, h:210,
+    cover:'images/thumbnails/INTMAX.png',
+    gallery:[
+      {src:'images/projects/INTMAX/01.gif'},
+      {src:'images/projects/INTMAX/02.gif'},
+      {src:'images/projects/INTMAX/03.gif'},
+      {src:'images/projects/INTMAX/04.png'},
+      {src:'images/projects/INTMAX/05.png'},
+      {src:'images/projects/INTMAX/06.png'},
+      {src:'images/projects/INTMAX/07.png'},
+    ]
+  },
+  {
+    id:3, w:190, h:250,
+    cover:'images/thumbnails/SEQUENCE.png',
+    gallery:[
+      {src:'images/projects/SEQUENCE/01.png'},
+      {src:'images/projects/SEQUENCE/02.png'},
+      {src:'images/projects/SEQUENCE/08.gif'},
+      {src:'images/projects/SEQUENCE/03.png'},
+      {src:'images/projects/SEQUENCE/04.png'},
+      {src:'images/projects/SEQUENCE/06.png'},
+      {src:'images/projects/SEQUENCE/05.png'},
+      {src:'images/projects/SEQUENCE/07.gif'},
+    ]
+  },
+  {
+    id:4, w:250, h:180,
+    cover:'images/thumbnails/STORJ.png',
+    gallery:[
+      {src:'images/projects/STORJ/01.png'},
+      {src:'images/projects/STORJ/02.gif'},
+      {src:'images/projects/STORJ/03.png'},
+      {src:'images/projects/STORJ/04.png'},
+    ]
+  },
+  {
+    id:5, w:220, h:290,
+    cover:'images/thumbnails/POTTERY.jpg',
+    gallery:[
+      {src:'images/projects/POTTERY/01.jpg'},
+      {src:'images/projects/POTTERY/02.jpg'},
+      {src:'images/projects/POTTERY/03.jpg'},
+      {src:'images/projects/POTTERY/04.jpg'},
+      {src:'images/projects/POTTERY/05.jpg'},
+    ]
+  },
+  {
+    id:6, w:290, h:200,
+    cover:'images/thumbnails/STUFF.jpg',
+    gallery:[
+      {src:'images/projects/STUFF/01.jpg'},
+      {src:'images/projects/STUFF/02.jpg'},
+      {src:'images/projects/STUFF/03.jpg'},
+    ]
+  },
+];
 
-        const projects = [
-            {
-                title: "RABBITX",
-                year: "2025",
-                desc: "Brand Identity Design",
-                thumbnail: "images/thumbnails/RABBITX.png",
-                images: [
-                    { src: "images/projects/RABBITX/01.jpg", layout: "half" },
-                    { src: "images/projects/RABBITX/02.png", layout: "half" },
-                    { src: "images/projects/RABBITX/03.png", layout: "half" },
-                    { src: "images/projects/RABBITX/05.png", layout: "half" },
-                    { src: "images/projects/RABBITX/06.png", layout: "half" }
-                ]
-            },
-            {
-                title: "QWEST",
-                year: "2025",
-                desc: "Brand Identity Design",
-                thumbnail: "images/thumbnails/QWEST.png",
-                images: [
-                    { src: "images/projects/QWEST/01.png", layout: "half" },
-                    { src: "images/projects/QWEST/02.jpg", layout: "half" },
-                    { src: "images/projects/QWEST/03.png", layout: "full", autoPan: true },
-                    { src: "images/projects/QWEST/04.jpg", layout: "half" },
-                    { src: "images/projects/QWEST/05.gif", layout: "third" }
-                ]
-            },
-            {
-                title: "INTMAX",
-                year: "2026",
-                desc: "Brand Identity Design",
-                thumbnail: "images/thumbnails/INTMAX.png",
-                images: [
-                    { src: "images/projects/INTMAX/01.gif", layout: "half" },
-                    { src: "images/projects/INTMAX/02.gif", layout: "quarter" },
-                    { src: "images/projects/INTMAX/03.gif", layout: "quarter" },
-                    { src: "images/projects/INTMAX/04.png", layout: "third" },
-                    { src: "images/projects/INTMAX/05.png", layout: "third" },
-                    { src: "images/projects/INTMAX/06.png", layout: "third" },
-                    { src: "images/projects/INTMAX/07.png", layout: "third" }
-                ]
-            },
-            {
-                title: "SEQUENCE MARKETS",
-                year: "2026",
-                desc: "Brand Identity Design",
-                thumbnail: "images/thumbnails/SEQUENCE.png",
-                images: [
-                    { src: "images/projects/SEQUENCE/01.png", layout: "half" },
-                    { src: "images/projects/SEQUENCE/02.png", layout: "quarter" },
-                    { src: "images/projects/SEQUENCE/08.gif", layout: "quarter" },
-                    { src: "images/projects/SEQUENCE/03.png", layout: "half" },
-                    { src: "images/projects/SEQUENCE/04.png", layout: "quarter" },
-                    { src: "images/projects/SEQUENCE/06.png", layout: "quarter" },
-                    { src: "images/projects/SEQUENCE/05.png", layout: "half" },
-                    { src: "images/projects/SEQUENCE/07.gif", layout: "half" }
-                ]
-            },
-            {
-                title: "STORJ",
-                year: "2026",
-                desc: "Brand Identity Design",
-                thumbnail: "images/thumbnails/STORJ.png",
-                images: [
-                    { src: "images/projects/STORJ/01.png", layout: "half" },
-                    { src: "images/projects/STORJ/02.gif", layout: "third" },
-                    { src: "images/projects/STORJ/03.png", layout: "half" },
-                    { src: "images/projects/STORJ/04.png", layout: "half" }
-                ]
-            },
-            {
-                title: "POTTERY",
-                year: "2021",
-                desc: "Various Pottery Pieces",
-                thumbnail: "images/thumbnails/POTTERY.jpg",
-                images: [
-                    { src: "images/projects/POTTERY/01.jpg", layout: "third" },
-                    { src: "images/projects/POTTERY/02.jpg", layout: "third" },
-                    { src: "images/projects/POTTERY/03.jpg", layout: "third" },
-                    { src: "images/projects/POTTERY/04.jpg", layout: "third" },
-                    { src: "images/projects/POTTERY/05.jpg", layout: "third" }
-                ]
-            },
-            {
-                title: "Industrial Design",
-                year: "2021",
-                desc: "Various Industrial Design Pieces",
-                thumbnail: "images/thumbnails/STUFF.jpg",
-                images: [
-                    { src: "images/projects/STUFF/01.jpg", layout: "third" },
-                    { src: "images/projects/STUFF/02.jpg", layout: "half" },
-                    { src: "images/projects/STUFF/03.jpg", layout: "third" }
-                ]
-            }          
-        ];
+// ── WebGL ──
+(function() {
+  const canvas = document.getElementById('glCanvas');
+  const gl = canvas.getContext('webgl2', {alpha:true});
+  if (!gl) return;
+  const resize = () => { canvas.width=innerWidth; canvas.height=innerHeight; gl.viewport(0,0,canvas.width,canvas.height); };
+  resize(); window.addEventListener('resize', resize);
+  const vs = `#version 300 es
+  precision highp float;
+  in vec2 a_pos; in float a_phase; in float a_speed;
+  uniform float u_time; out float v_alpha;
+  void main(){
+    float t=u_time*a_speed;
+    float y=mod(a_pos.y-t,1.0);
+    float x=a_pos.x+sin(t*2.0+a_phase)*0.012;
+    v_alpha=(1.0-abs(y-0.5)*2.0)*0.13;
+    vec2 c=vec2(x,y)*2.0-1.0; c.y=-c.y;
+    gl_Position=vec4(c,0.0,1.0); gl_PointSize=1.5;
+  }`;
+  const fs = `#version 300 es
+  precision mediump float;
+  in float v_alpha; out vec4 o;
+  void main(){ o=vec4(0.,0.,0.,v_alpha); }`;
+  const mk=(t,s)=>{ const sh=gl.createShader(t); gl.shaderSource(sh,s); gl.compileShader(sh); return sh; };
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,vs));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  const N=500, pos=new Float32Array(N*2), ph=new Float32Array(N), sp=new Float32Array(N);
+  for(let i=0;i<N;i++){ pos[i*2]=Math.random();pos[i*2+1]=Math.random();ph[i]=Math.random()*Math.PI*2;sp[i]=0.03+Math.random()*0.05; }
+  const buf=(data,loc,sz)=>{ const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,sz,gl.FLOAT,false,0,0); };
+  buf(pos,gl.getAttribLocation(prog,'a_pos'),2);
+  buf(ph, gl.getAttribLocation(prog,'a_phase'),1);
+  buf(sp, gl.getAttribLocation(prog,'a_speed'),1);
+  const uT=gl.getUniformLocation(prog,'u_time');
+  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  let t0=null;
+  (function frame(ts){ if(!t0)t0=ts; gl.clear(gl.COLOR_BUFFER_BIT); gl.uniform1f(uT,(ts-t0)/1000); gl.drawArrays(gl.POINTS,0,N); requestAnimationFrame(frame); })(0);
+})();
 
-        function createThumbnails() {
-            const container = document.getElementById('thumbnail-container');
-            container.innerHTML = '';
+// ── Constants ──
+const FLASH_SCALE = 0.62;
+const MAX_THUMB   = 380;
+const MOBILE_BP   = 900;
+let scattered = false;
+let homeScrollY = 0;
+const getCX = () => innerWidth  / 2;
+const getCY = () => innerHeight / 2;
 
-            projects.forEach((p, i) => {
-                const div = document.createElement('div');
-                div.className = "project-card cursor-pointer";
-                div.innerHTML = `
-                    <div class="thumbnail-container">
-                        <img src="${p.thumbnail}" class="thumbnail-img" decoding="sync">
-                    </div>
-                    <div class="mt-4">
-                        <h3 class="font-medium">${p.title}</h3>
-                        <p class="text-neutral-600">${p.desc}</p>
-                    </div>
-                `;
-                div.onclick = () => openProject(i);
-                container.appendChild(div);
-            });
-        }
+function naturalSize(nw, nh) {
+  const s = Math.min(1, MAX_THUMB / Math.max(nw, nh));
+  return { w: Math.round(nw * s), h: Math.round(nh * s) };
+}
 
-        function showProject(index) {
-            const p = projects[index];
+// ── Place cards ──
+function placeCards(naturalDims) {
+  const vw  = innerWidth;
+  const gap = 80;
+  const maxCardW = Math.max(...PROJECTS.map(p => p.w));
+  const vscale = Math.min(1, (vw - gap * 2) / maxCardW);
 
-            requestAnimationFrame(() => {
-                document.getElementById('projects-grid').classList.add('hidden');
-                document.getElementById('left-panel').classList.add('hidden', 'md:flex');
+  if (vw < MOBILE_BP) {
+    const mEdge = 8, mGap = 48, mTop = 80;
+    const ms = Math.min(1, (vw - mEdge * 2) / maxCardW);
+    let y = mTop;
+    const pos = PROJECTS.map((p, i) => {
+      const nd = naturalDims && naturalDims[i];
+      const w = nd ? nd.w : Math.floor(p.w * ms);
+      const h = nd ? nd.h : Math.floor(p.h * ms);
+      const e = { x: Math.floor((vw - w) / 2), y };
+      y += h + mGap;
+      return e;
+    });
+    return { positions: pos, totalHeight: y + mGap, vscale: ms };
+  }
 
-                requestAnimationFrame(() => {
-                    document.getElementById('project-detail').classList.remove('hidden');
-                    document.getElementById('project-title').textContent = p.title;
-                    document.getElementById('project-year').textContent = p.year;
+  // Layout: 2-column zigzag. Each card gets its own vertical band.
+  // Odd-indexed cards go left half, even go right half (or vice versa),
+  // with random x within that half and random y within the band.
+  // This prevents vertical stacking and keeps layout balanced.
+  const MAX_SITE_W = 1400; // max layout width
+  const layoutW = Math.min(vw, MAX_SITE_W);
+  const n = PROJECTS.length;
+  const totalHeight = Math.ceil(innerHeight * 2.8);
+  const topPad = 120;  // space before first card
+  const botPad = 120;  // space after last card
+  const bandH = Math.floor((totalHeight - topPad - botPad) / n);
+  const halfW = Math.floor(layoutW / 2);
+  const xOffset = Math.floor((vw - layoutW) / 2); // centre the layout
+  const positions = [];
 
-                    const container = document.getElementById('detail-images');
-                    container.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const p = PROJECTS[i];
+    const nd = naturalDims && naturalDims[i];
+    const w = nd ? nd.w : Math.floor(p.w * vscale);
+    const h = nd ? nd.h : Math.floor(p.h * vscale);
 
-                    p.images.forEach(img => {
-                        const div = document.createElement('div');
+    // Alternate columns: even = left half, odd = right half
+    const col = i % 2;
+    const xMin = xOffset + (col === 0 ? gap : halfW + gap);
+    const xMax = xOffset + (col === 0 ? halfW - w - gap : layoutW - w - gap);
+    // Base x within column, plus a small random cross-column nudge
+    const nudge = (Math.random() - 0.5) * halfW * 0.18;
+    const x = xMin + Math.random() * Math.max(1, xMax - xMin) + nudge;
 
-                        if (img.layout === "full") div.className = "full";
-                        else if (img.layout === "half") div.className = "half";
-                        else if (img.layout === "third") div.className = "third";
-                        else if (img.layout === "two-thirds") div.className = "two-thirds";
-                        else if (img.layout === "quarter") div.className = "quarter";
-                        else if (img.layout === "three-quarters") div.className = "three-quarters";
-                        else div.className = "full";
+    // Vertical band for this card
+    const yMin = topPad + i * bandH + gap;
+    const yMax = Math.max(yMin + 1, topPad + (i + 1) * bandH - h - gap);
+    const y = yMin + Math.random() * Math.max(1, yMax - yMin);
 
-                        if (img.autoPan) div.className += ' auto-pan';
+    positions.push({
+      x: Math.max(xOffset + gap, Math.min(xOffset + layoutW - w - gap, x)),
+      y: Math.max(gap, Math.min(totalHeight - h - gap, y))
+    });
+  }
 
-                        div.innerHTML = `<img src="${img.src}" alt="${p.title}" loading="lazy">`;
-                        container.appendChild(div);
-                    });
-                });
-            });
-        }
+  return { positions, totalHeight, vscale };
+}
 
-        function openProject(index) {
-            currentIndex = index;
-            requestAnimationFrame(() => showProject(index));
-        }
+// ── Create cards ──
+const cards = PROJECTS.map((p) => {
+  const el = document.createElement('div');
+  el.className = 'thumb';
+  const fw = Math.round(p.w * FLASH_SCALE);
+  const fh = Math.round(p.h * FLASH_SCALE);
+  el.style.width   = fw + 'px';
+  el.style.height  = fh + 'px';
+  el.style.left    = (getCX() - fw/2) + 'px';
+  el.style.top     = (getCY() - fh/2) + 'px';
+  el.style.opacity = '0';
 
-        function showBio() {
-            requestAnimationFrame(() => {
-                document.getElementById('project-detail').classList.add('hidden');
-                requestAnimationFrame(() => {
-                    document.getElementById('projects-grid').classList.remove('hidden');
-                    document.getElementById('left-panel').classList.remove('hidden');
-                });
-            });
-        }
+  const img = document.createElement('img');
+  img.alt = '';
+  img.onload = () => {
+    const { w, h } = naturalSize(img.naturalWidth, img.naturalHeight);
+    el.dataset.nw = w;
+    el.dataset.nh = h;
+    if (!scattered) {
+      const fw2 = Math.round(w * FLASH_SCALE);
+      const fh2 = Math.round(h * FLASH_SCALE);
+      el.style.width  = fw2 + 'px';
+      el.style.height = fh2 + 'px';
+      el.style.left   = (getCX() - fw2/2) + 'px';
+      el.style.top    = (getCY() - fh2/2) + 'px';
+    }
+  };
+  img.src = p.cover;
+  el.appendChild(img);
 
-        createThumbnails();
-    </script>
+
+
+  el.addEventListener('click', () => openProject(p.id));
+  document.body.appendChild(el);
+  return { el, p };
+});
+
+// ── Flash ──
+function runFlash(onDone) {
+  const order = cards.map((_,i) => i).sort((a,b) => b-a);
+  let idx = 0;
+  const INTERVAL = 180;
+  function flash() {
+    if (idx >= order.length) { setTimeout(() => onDone({ lastIdx: order[idx-1] }), 500); return; }
+    cards.forEach(c => c.el.style.opacity = '0');
+    cards[order[idx]].el.style.opacity = '1';
+    idx++;
+    setTimeout(flash, INTERVAL);
+  }
+  setTimeout(flash, 400);
+}
+
+// ── Fly out ──
+function flyOut(lastIdx) {
+  const naturalDims = cards.map(({el,p}) => el.dataset.nw
+    ? { w: parseInt(el.dataset.nw), h: parseInt(el.dataset.nh) }
+    : null);
+  const { positions, totalHeight, vscale } = placeCards(naturalDims);
+  document.body.style.height = totalHeight + 'px';
+  document.body.classList.add('scrollable');
+
+  const DURATION = 3.2;
+  const EASE = 'cubic-bezier(0.16, 1, 0.3, 1)';
+  const scrollY = window.scrollY || window.pageYOffset;
+
+  cards.forEach(({ el, p }, i) => {
+    const fx = positions[i].x;
+    const fy = positions[i].y;
+    const natW = el.dataset.nw ? parseInt(el.dataset.nw) : Math.floor(p.w * vscale);
+    const natH = el.dataset.nh ? parseInt(el.dataset.nh) : Math.floor(p.h * vscale);
+    const isLast = i === lastIdx;
+    const delay  = i * 60;
+
+    if (!isLast) el.style.opacity = '0';
+
+    const curLeft = parseFloat(el.style.left);
+    const curTop  = parseFloat(el.style.top);
+    el.style.transition = 'none';
+    el.style.position   = 'absolute';
+    el.style.left       = curLeft + 'px';
+    el.style.top        = (curTop + scrollY) + 'px';
+
+    setTimeout(() => {
+      el.style.transition = [
+        `left   ${DURATION}s ${EASE}`,
+        `top    ${DURATION}s ${EASE}`,
+        `width  ${DURATION}s ${EASE}`,
+        `height ${DURATION}s ${EASE}`,
+      ].join(',');
+      if (!isLast) {
+        el.style.setProperty('--fly-dur', DURATION * 1.05 + 's');
+        el.style.setProperty('--fade-anim', `fadeInCard${i+1}`);
+        el.classList.add('flying');
+      }
+      // Round to integer pixels to avoid subpixel jitter at rest
+      el.style.left   = Math.round(fx) + 'px';
+      el.style.top    = Math.round(fy) + 'px';
+      el.style.width  = Math.round(natW) + 'px';
+      el.style.height = Math.round(natH) + 'px';
+
+      setTimeout(() => {
+        el.style.transition = 'none';
+        el.style.opacity    = '1';
+        el.classList.remove('flying');
+        el.style.left   = Math.round(fx) + 'px';
+        el.style.top    = Math.round(fy) + 'px';
+      }, (DURATION * 1000) + delay + 80);
+    }, delay);
+  });
+  scattered = true;
+}
+
+// ── Resize reflow ──
+function reflow() {
+  if (!scattered) {
+    cards.forEach(({ el, p }) => {
+      const w = parseFloat(el.style.width)  || p.w * FLASH_SCALE;
+      const h = parseFloat(el.style.height) || p.h * FLASH_SCALE;
+      el.style.left = (getCX() - w/2) + 'px';
+      el.style.top  = (getCY() - h/2) + 'px';
+    });
+    return;
+  }
+  const naturalDims = cards.map(({el,p}) => el.dataset.nw
+    ? { w: parseInt(el.dataset.nw), h: parseInt(el.dataset.nh) }
+    : null);
+  const { positions, totalHeight, vscale } = placeCards(naturalDims);
+  document.body.style.height = totalHeight + 'px';
+  cards.forEach(({ el, p }, i) => {
+    el.style.transition = 'none';
+    el.style.position   = 'absolute';
+    el.style.left       = positions[i].x + 'px';
+    el.style.top        = positions[i].y + 'px';
+    const nw = el.dataset.nw ? parseInt(el.dataset.nw) : Math.floor(p.w * vscale);
+    const nh = el.dataset.nh ? parseInt(el.dataset.nh) : Math.floor(p.h * vscale);
+    el.style.width  = nw + 'px';
+    el.style.height = nh + 'px';
+  });
+}
+let resizeTimer;
+window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(reflow, 120); });
+
+// ── Project page ──
+let currentProjectId = 0;
+const projectPage = document.getElementById('project-page');
+const gallery     = document.getElementById('project-gallery');
+const backBtn     = document.getElementById('back-btn');
+const prevBtn     = document.getElementById('prev-btn');
+const nextBtn     = document.getElementById('next-btn');
+
+function updateArrows(id) {
+  prevBtn.disabled = id <= 0;
+  nextBtn.disabled = id >= PROJECTS.length - 1;
+}
+
+prevBtn.addEventListener('click', () => {
+  if (currentProjectId > 0) openProject(currentProjectId - 1);
+});
+nextBtn.addEventListener('click', () => {
+  if (currentProjectId < PROJECTS.length - 1) openProject(currentProjectId + 1);
+});
+
+function showHome() {
+  projectPage.classList.remove('visible');
+  document.getElementById('glCanvas').style.display = '';
+  cards.forEach(c => c.el.style.display = '');
+  document.body.style.cursor = 'crosshair';
+  document.body.style.height = '';
+  // Restore body height then scroll to where user was
+  const naturalDims = cards.map(({el,p}) => el.dataset.nw ? {w:parseInt(el.dataset.nw),h:parseInt(el.dataset.nh)} : null);
+  const { totalHeight } = placeCards(naturalDims);
+  document.body.style.height = totalHeight + 'px';
+  requestAnimationFrame(() => window.scrollTo(0, homeScrollY));
+}
+
+function showProject(id) {
+  const p = PROJECTS[id];
+  if (!p) return;
+  currentProjectId = id;
+  updateArrows(id);
+  document.getElementById('glCanvas').style.display = 'none';
+  cards.forEach(c => c.el.style.display = 'none');
+  document.body.style.cursor = 'default';
+  document.body.style.height = 'auto';
+  if (history.scrollRestoration) history.scrollRestoration = "manual";
+window.scrollTo(0, 0);
+
+  gallery.innerHTML = '';
+
+  // Load natural ratios then group into rows (from original layout logic)
+  function loadRatio(item) {
+    return new Promise(resolve => {
+      if (item.autoPan) return resolve({ ...item, ratio: 999 });
+      const img = new Image();
+      img.onload  = () => resolve({ ...item, ratio: img.naturalWidth / img.naturalHeight });
+      img.onerror = () => resolve({ ...item, ratio: 16/9 });
+      img.src = item.src;
+    });
+  }
+
+  function groupIntoRows(items) {
+    const rows = [];
+    let i = 0;
+    while (i < items.length) {
+      const item = items[i];
+      if (item.autoPan || item.ratio > 3) { rows.push([item]); i++; continue; }
+      if (item.ratio > 2) {
+        const next = items[i+1];
+        if (next && !next.autoPan && next.ratio <= 3) { rows.push([item, next]); i+=2; }
+        else { rows.push([item]); i++; }
+        continue;
+      }
+      let count = Math.min(3, items.length - i);
+      if (count === 3) {
+        const third = items[i+2];
+        if (third && (third.autoPan || third.ratio > 2)) count = 2;
+      }
+      rows.push(items.slice(i, i + count));
+      i += count;
+    }
+    // Fix solo non-wide rows
+    for (let j = 0; j < rows.length; j++) {
+      const row = rows[j];
+      if (row.length === 1 && !row[0].autoPan && row[0].ratio <= 3 && j > 0) {
+        const prev = rows[j-1];
+        const prevMax = prev.some(it => it.ratio > 2) ? 2 : 3;
+        const prevSolo = prev.length === 1 && (prev[0].autoPan || prev[0].ratio > 3);
+        if (!prevSolo && prev.length < prevMax) { prev.push(row[0]); rows.splice(j,1); j--; }
+        else if (!prevSolo && prev.length >= 2) { const moved = prev.pop(); rows[j] = [moved, row[0]]; }
+      }
+    }
+    return rows;
+  }
+
+  Promise.all(p.gallery.map(loadRatio)).then(items => {
+    const rows = groupIntoRows(items);
+    rows.forEach(row => {
+      if (row.length === 1 && row[0].autoPan) {
+        const wrap = document.createElement('div');
+        wrap.className = 'autopan-wrap';
+        const img = document.createElement('img');
+        img.src = row[0].src; img.alt = ''; img.decoding = 'sync';
+        img.onload = () => wrap.classList.add('loaded');
+        wrap.appendChild(img);
+        gallery.appendChild(wrap);
+        return;
+      }
+      const rowEl = document.createElement('div');
+      rowEl.className = 'img-row';
+      const totalRatio = row.reduce((s, it) => s + it.ratio, 0);
+      row.forEach(item => {
+        const wrap = document.createElement('div');
+        const isGif = item.src.toLowerCase().endsWith('.gif');
+        wrap.className = 'img-wrap' + (isGif ? ' is-gif' : '');
+        const pct = (item.ratio / totalRatio) * 100;
+        const gapShare = (row.length - 1) * 4 / row.length;
+        wrap.style.width = `calc(${pct}% - ${gapShare}px)`;
+        const img = document.createElement('img');
+        img.src = item.src; img.alt = ''; img.decoding = 'sync'; img.loading = 'lazy';
+        img.onload = () => wrap.classList.add('loaded');
+        wrap.appendChild(img);
+        rowEl.appendChild(wrap);
+      });
+      gallery.appendChild(rowEl);
+    });
+  });
+
+  projectPage.classList.add('visible');
+}
+
+function openProject(id) {
+  homeScrollY = window.scrollY || window.pageYOffset;
+  history.pushState({ project: id, scrollY: homeScrollY }, '', `?project=${id}`);
+  showProject(id);
+}
+
+backBtn.addEventListener('click', () => { history.pushState(null, '', location.pathname); showHome(); });
+
+window.addEventListener('popstate', (e) => {
+  if (e.state && e.state.project !== undefined) {
+    showProject(e.state.project);
+  } else {
+    if (e.state && e.state.scrollY !== undefined) homeScrollY = e.state.scrollY;
+    showHome();
+  }
+});
+
+function checkURL() {
+  const params = new URLSearchParams(location.search);
+  const id = params.get('project');
+  if (id !== null) { showProject(parseInt(id)); return true; }
+  return false;
+}
+
+if (history.scrollRestoration) history.scrollRestoration = "manual";
+window.scrollTo(0, 0);
+
+if (!checkURL()) {
+  runFlash(({ lastIdx }) => requestAnimationFrame(() => flyOut(lastIdx)));
+}
+</script>
 </body>
 </html>
