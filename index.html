@@ -132,6 +132,9 @@
     width:100%;
     padding:80px 0 100px;
   }
+  @media (max-width:600px) {
+    #contact { padding:32px 0 60px; }
+  }
   #contact-inner {
     max-width:480px;
     margin:0 auto;
@@ -147,9 +150,13 @@
   .contact-input::placeholder { color:#bbb; }
   .contact-row { margin-bottom:20px; }
   .contact-submit {
-    margin-top:32px; background:none; border:none; border-bottom:1px solid #000;
+    margin-top:32px; background:none; border:none; border-bottom:1px solid #bbb;
     padding:10px 0; font-family:inherit; font-size:9pt;
-    cursor:pointer; letter-spacing:0.1em; color:#000;
+    cursor:default; letter-spacing:0.1em; color:#bbb;
+    transition:color 0.2s, border-color 0.2s;
+  }
+  .contact-submit.ready {
+    color:#000; border-bottom-color:#000; cursor:pointer;
   }
   #form-status { font-size:9pt; color:#a3a3a3; margin-top:8px; min-height:1em; }
 </style>
@@ -530,7 +537,7 @@ function flyOut(lastIdx) {
       </div>`;
     document.body.appendChild(contactEl);
     document.body.style.height = (th + contactEl.offsetHeight) + 'px';
-    requestAnimationFrame(() => requestAnimationFrame(() => { contactEl.style.opacity = '1'; }));
+    requestAnimationFrame(() => requestAnimationFrame(() => { contactEl.style.opacity = '1'; attachFormListeners(); }));
   }, 3200 + (cards.length * 60) + 400);
 }
 
@@ -741,6 +748,25 @@ function checkURL() {
 
 // ── Contact form ──
 let lastSubmit = 0;
+
+function checkFormReady() {
+  const btn = document.querySelector('.contact-submit');
+  if (!btn) return;
+  const name    = document.getElementById('contact-name')?.value.trim();
+  const details = document.getElementById('contact-details')?.value.trim();
+  const message = document.getElementById('contact-message')?.value.trim();
+  if (name && details && message) btn.classList.add('ready');
+  else btn.classList.remove('ready');
+}
+
+// Attach listeners after form is injected
+function attachFormListeners() {
+  ['contact-name','contact-details','contact-message'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', checkFormReady);
+  });
+  checkFormReady();
+}
 const RATE_LIMIT_MS = 60000;
 
 async function sendMessage() {
