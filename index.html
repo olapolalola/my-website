@@ -91,8 +91,6 @@
     color-profile: sRGB;
     filter: none;
   }
-
-  /* Auto-pan: fixed height container, image scrolls horizontally */
   .autopan-wrap {
     width:100%; height:420px; overflow:hidden; position:relative; background:#e8e8e8; outline:1px solid #efefef;
     opacity:0; transition:opacity 0.4s;
@@ -108,7 +106,6 @@
     -webkit-backface-visibility: hidden;
     image-rendering: -webkit-optimize-contrast;
   }
-
   @media (max-width:768px) {
     .img-row { flex-direction:column; }
     .img-row .img-wrap { width:100% !important; }
@@ -178,17 +175,15 @@
   </div>
 </div>
 
+
 <script>
 const PROJECTS = [
-  // ── Flash-only images (sequence only) ──
   { flashOnly:true, w:280, h:280, cover:'images/thumbnails/flash-01.jpg' },
   { flashOnly:true, w:280, h:280, cover:'images/thumbnails/flash-02.jpg' },
   { flashOnly:true, w:280, h:280, cover:'images/thumbnails/flash-03.jpg' },
   { flashOnly:true, w:280, h:280, cover:'images/thumbnails/flash-04.jpg' },
   { flashOnly:true, w:280, h:280, cover:'images/thumbnails/flash-05.jpg' },
   { flashOnly:true, w:280, h:280, cover:'images/thumbnails/flash-06.png' },
-
-  // ── Project thumbnails (clickable, scattered) ──
   {
     id:0, w:280, h:200, perRow:2,
     cover:'images/thumbnails/RABBITX.png',
@@ -365,6 +360,7 @@ function makeSizedEl(coverSrc, pw, ph, clickable, scale) {
 const flashEls = flashOnlyItems.map(p => makeSizedEl(p.cover, p.w, p.h, false));
 const cards = projectItems.map((p) => {
   const el = makeSizedEl(p.cover, p.w, p.h, true, THUMB_SCALE);
+  el.style.pointerEvents = 'none';
   el.addEventListener('click', () => openProject(p.id));
   return { el, p };
 });
@@ -432,16 +428,10 @@ function runFlash(onDone) {
   }
   const lastProjIdx = cards.findIndex(c => c.p.id === 0);
   projOrder.push(lastProjIdx);
-
   const allEls = [...flashEls, ...cards.map(c => c.el)];
-  const sequence = [
-    ...foOrder,
-    ...projOrder.map(i => flashEls.length + i)
-  ];
-
+  const sequence = [...foOrder, ...projOrder.map(i => flashEls.length + i)];
   let idx = 0;
   function getDuration(i) { return 200; }
-
   function flash() {
     if (idx >= sequence.length) {
       setTimeout(() => {
@@ -466,6 +456,7 @@ function flyOut(lastIdx) {
   const { positions, totalHeight, vscale } = placeCards(naturalDims);
   document.body.style.height = totalHeight + 'px';
   document.body.classList.add('scrollable');
+  cards.forEach(({ el }) => { el.style.pointerEvents = 'auto'; });
 
   const DURATION = 3.2;
   const EASE = 'cubic-bezier(0.16, 1, 0.3, 1)';
@@ -478,9 +469,7 @@ function flyOut(lastIdx) {
     const natH = el.dataset.nh ? parseInt(el.dataset.nh) : Math.floor(p.h * vscale);
     const isLast = i === lastIdx;
     const delay  = i * 60;
-
     if (!isLast) el.style.opacity = '0';
-
     const curLeft = parseFloat(el.style.left);
     const curTop  = parseFloat(el.style.top);
     const curW    = parseFloat(el.style.width);
@@ -493,12 +482,7 @@ function flyOut(lastIdx) {
     el.style.height     = curH + 'px';
 
     setTimeout(() => {
-      el.style.transition = [
-        `left   ${DURATION}s ${EASE}`,
-        `top    ${DURATION}s ${EASE}`,
-        `width  ${DURATION}s ${EASE}`,
-        `height ${DURATION}s ${EASE}`,
-      ].join(',');
+      el.style.transition = [`left ${DURATION}s ${EASE}`,`top ${DURATION}s ${EASE}`,`width ${DURATION}s ${EASE}`,`height ${DURATION}s ${EASE}`].join(',');
       if (!isLast) {
         el.style.setProperty('--fly-dur', DURATION * 1.05 + 's');
         el.style.setProperty('--fade-anim', `fadeInCard${i+1}`);
@@ -516,17 +500,18 @@ function flyOut(lastIdx) {
         el.classList.add('settled');
         el.style.left   = Math.round(fx) + 'px';
         el.style.top    = Math.round(fy) + 'px';
+
       }, (DURATION * 1000) + delay + 80);
     }, delay);
   });
   scattered = true;
 
-  setTimeout(() => {
-    const th = parseFloat(document.body.style.height) || document.body.scrollHeight;
-    const contactEl = document.createElement('div');
-    contactEl.id = 'contact';
-    contactEl.style.cssText = 'position:absolute;top:' + th + 'px;width:100%;opacity:0;transition:opacity 1s ease;';
-    contactEl.innerHTML = `
+  // Inject contact immediately so it's ready when user scrolls
+  const th0 = parseFloat(document.body.style.height) || document.body.scrollHeight;
+  const contactEl = document.createElement('div');
+  contactEl.id = 'contact';
+  contactEl.style.cssText = 'position:absolute;top:' + th0 + 'px;width:100%;opacity:0;transition:opacity 0.6s ease;';
+  contactEl.innerHTML = `
       <div id="contact-inner">
         <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
         <div class="contact-row"><input type="text" id="contact-name" class="contact-input" placeholder="name *"></div>
@@ -535,10 +520,9 @@ function flyOut(lastIdx) {
         <button class="contact-submit" onclick="sendMessage()">send →</button>
         <p id="form-status"></p>
       </div>`;
-    document.body.appendChild(contactEl);
-    document.body.style.height = (th + contactEl.offsetHeight) + 'px';
-    requestAnimationFrame(() => requestAnimationFrame(() => { contactEl.style.opacity = '1'; attachFormListeners(); }));
-  }, 3200 + (cards.length * 60) + 400);
+  document.body.appendChild(contactEl);
+  document.body.style.height = (th0 + contactEl.offsetHeight) + 'px';
+  requestAnimationFrame(() => requestAnimationFrame(() => { contactEl.style.opacity = '1'; attachFormListeners(); }));
 }
 
 // ── Resize reflow ──
@@ -607,7 +591,8 @@ function showHome() {
   const naturalDims = cards.map(({el,p}) => el.dataset.nw ? {w:parseInt(el.dataset.nw),h:parseInt(el.dataset.nh)} : null);
   const { totalHeight } = placeCards(naturalDims);
   document.body.style.height = totalHeight + 'px';
-  requestAnimationFrame(() => window.scrollTo(0, homeScrollY));
+  // Wait two frames: one to apply height, one to scroll
+  requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, homeScrollY)));
 }
 
 function showProject(id) {
@@ -627,17 +612,12 @@ function showProject(id) {
     let i = 0;
     while (i < items.length) {
       const item = items[i];
-      // autoPan always gets its own row
       if (item.autoPan) { rows.push([item]); i++; continue; }
-      // Use perRow if set, otherwise default to 2 minimum, 3 maximum
       const max = perRow || 3;
-      const min = perRow || 2;
       let count = Math.min(max, items.length - i);
-      // Don't pull an autoPan into a multi-item row
       for (let k = 1; k < count; k++) {
         if (items[i + k] && items[i + k].autoPan) { count = k; break; }
       }
-      // Single leftover: allow it as its own row with empty space beside it
       rows.push(items.slice(i, i + count));
       i += count;
     }
@@ -664,8 +644,7 @@ function showProject(id) {
       wrap.className = 'img-wrap' + (isGif ? ' is-gif' : '');
       let wrapWidth;
       if (row.length === 1) {
-        // Solo image: roughly 1/3 of the row width
-        wrapWidth = `40%`;
+        wrapWidth = '40%';
       } else {
         const pct = (item.ratio / totalRatio) * 100;
         const gapShare = (row.length - 1) * 4 / row.length;
@@ -687,17 +666,11 @@ function showProject(id) {
   function tryRenderRows(final) {
     const rows = groupIntoRows(collected.slice(renderedCount), p.perRow);
     const toRender = final ? rows : rows.slice(0, rows.length - 1);
-    toRender.forEach(row => {
-      renderRow(row);
-      renderedCount += row.length;
-    });
+    toRender.forEach(row => { renderRow(row); renderedCount += row.length; });
   }
 
   function loadNext(idx) {
-    if (idx >= p.gallery.length) {
-      tryRenderRows(true);
-      return;
-    }
+    if (idx >= p.gallery.length) { tryRenderRows(true); return; }
     const item = p.gallery[idx];
     if (item.autoPan) {
       collected.push({ ...item, ratio: 999 });
@@ -706,20 +679,11 @@ function showProject(id) {
       return;
     }
     const img = new Image();
-    img.onload = () => {
-      collected.push({ ...item, ratio: img.naturalWidth / img.naturalHeight });
-      tryRenderRows(false);
-      loadNext(idx + 1);
-    };
-    img.onerror = () => {
-      collected.push({ ...item, ratio: 16/9 });
-      tryRenderRows(false);
-      loadNext(idx + 1);
-    };
+    img.onload  = () => { collected.push({ ...item, ratio: img.naturalWidth / img.naturalHeight }); tryRenderRows(false); loadNext(idx + 1); };
+    img.onerror = () => { collected.push({ ...item, ratio: 16/9 }); tryRenderRows(false); loadNext(idx + 1); };
     img.src = item.src;
   }
   loadNext(0);
-
   projectPage.classList.add('visible');
 }
 
@@ -729,25 +693,26 @@ function openProject(id) {
   showProject(id);
 }
 
-backBtn.addEventListener('click', () => { history.pushState(null, '', location.pathname); showHome(); });
+backBtn.addEventListener('click', () => {
+  history.pushState(null, '', location.pathname);
+  showHome();
+});
 
 window.addEventListener('popstate', (e) => {
-  if (e.state && e.state.project !== undefined) showProject(e.state.project);
-  else {
+  if (e.state && e.state.project !== undefined) {
+    showProject(e.state.project);
+  } else if (scattered) {
     if (e.state && e.state.scrollY !== undefined) homeScrollY = e.state.scrollY;
     showHome();
+  } else {
+    // No valid home state (e.g. refreshed on project) — restart from beginning
+    window.location.href = location.pathname;
   }
 });
 
-function checkURL() {
-  const params = new URLSearchParams(location.search);
-  const id = params.get('project');
-  if (id !== null) { showProject(parseInt(id)); return true; }
-  return false;
-}
-
 // ── Contact form ──
 let lastSubmit = 0;
+const RATE_LIMIT_MS = 60000;
 
 function checkFormReady() {
   const btn = document.querySelector('.contact-submit');
@@ -759,7 +724,6 @@ function checkFormReady() {
   else btn.classList.remove('ready');
 }
 
-// Attach listeners after form is injected
 function attachFormListeners() {
   ['contact-name','contact-details','contact-message'].forEach(id => {
     const el = document.getElementById(id);
@@ -767,27 +731,21 @@ function attachFormListeners() {
   });
   checkFormReady();
 }
-const RATE_LIMIT_MS = 60000;
 
 async function sendMessage() {
   const honeypot = document.querySelector('input[name="_gotcha"]');
   if (honeypot && honeypot.value) return;
-
   const now = Date.now();
   const status = document.getElementById('form-status');
-
   if (now - lastSubmit < RATE_LIMIT_MS) {
     const wait = Math.ceil((RATE_LIMIT_MS - (now - lastSubmit)) / 1000);
     status.textContent = `Please wait ${wait}s before sending again.`;
     return;
   }
-
   const name    = document.getElementById('contact-name').value.trim();
   const details = document.getElementById('contact-details').value.trim();
   const message = document.getElementById('contact-message').value.trim();
-
   if (!name || !details || !message) return;
-
   try {
     const res = await fetch('https://formspree.io/f/xzdwedeq', {
       method: 'POST',
@@ -812,9 +770,16 @@ async function sendMessage() {
 if (history.scrollRestoration) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
 
-if (!checkURL()) {
-  runFlash(({ lastIdx }) => requestAnimationFrame(() => flyOut(lastIdx)));
+// If URL has ?project= on load, clear it and just run from homepage
+// (refresh on project = restart website)
+if (new URLSearchParams(location.search).get('project') !== null) {
+  history.replaceState(null, '', location.pathname);
 }
+
+runFlash(({ lastIdx }) => requestAnimationFrame(() => flyOut(lastIdx)));
+
+
+
 </script>
 
 </body>
