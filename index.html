@@ -159,17 +159,16 @@
   #form-status { font-size:9pt; color:#a3a3a3; margin-top:8px; min-height:1em; }
 
   /* ── Loading spinner ── */
-  .img-wrap::before, .autopan-wrap::before {
-    content: '*';
+  .img-spinner {
     position:absolute;
     top:50%; left:50%;
     transform:translate(-50%,-50%);
-    font-size:20px;
+    font-size:18px;
     color:#ccc;
     animation: spinAsterisk 1.2s linear infinite;
     pointer-events:none;
+    z-index:1;
   }
-  .img-wrap.loaded::before, .autopan-wrap.loaded::before { display:none; }
   @keyframes spinAsterisk { to { transform:translate(-50%,-50%) rotate(360deg); } }
 </style>
 </head>
@@ -645,7 +644,7 @@ function showProject(id) {
       wrap.className = 'autopan-wrap';
       const img = document.createElement('img');
       img.src = row[0].src; img.alt = ''; img.decoding = 'sync';
-      img.onload = () => wrap.classList.add('loaded');
+      img.onload = () => { wrap.classList.add('loaded'); const sp = wrap.querySelector('.img-spinner'); if (sp) sp.remove(); };
       wrap.appendChild(img);
       gallery.appendChild(wrap);
       return;
@@ -666,9 +665,13 @@ function showProject(id) {
         wrapWidth = `calc(${pct}% - ${gapShare}px)`;
       }
       wrap.style.width = wrapWidth;
+      const spinner = document.createElement('span');
+      spinner.className = 'img-spinner';
+      spinner.textContent = '*';
+      wrap.appendChild(spinner);
       const img = document.createElement('img');
       img.src = item.src; img.alt = ''; img.decoding = 'sync'; img.loading = 'lazy';
-      img.onload = () => wrap.classList.add('loaded');
+      img.onload = () => { wrap.classList.add('loaded'); const sp = wrap.querySelector('.img-spinner'); if (sp) sp.remove(); };
       wrap.appendChild(img);
       rowEl.appendChild(wrap);
     });
