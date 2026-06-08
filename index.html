@@ -76,9 +76,8 @@
   #prev-btn:disabled, #next-btn:disabled { opacity:0.15; cursor:default; }
   #project-gallery { display:flex; flex-direction:column; gap:4px; }
   .img-row { display:flex; gap:4px; width:100%; align-items:flex-start; }
-  .img-row .img-wrap { position:relative; flex-shrink:1; min-width:0; overflow:hidden; background:transparent; opacity:1; transition:opacity 0.4s; outline:1px solid #efefef; }
-  .img-row .img-wrap img { opacity:0; transition:opacity 0.4s; }
-  .img-row .img-wrap.loaded img { opacity:1; }
+  .img-row .img-wrap { position:relative; flex-shrink:1; min-width:0; overflow:hidden; background:transparent; opacity:0; transition:opacity 0.4s; outline:1px solid #efefef; }
+  .img-row .img-wrap.loaded { opacity:1; }
   .img-row .img-wrap img {
     width:100%; height:auto; display:block;
     image-rendering: auto;
@@ -158,18 +157,7 @@
   }
   #form-status { font-size:9pt; color:#a3a3a3; margin-top:8px; min-height:1em; }
 
-  /* ── Loading spinner ── */
-  .img-spinner {
-    position:absolute;
-    top:50%; left:50%;
-    transform:translate(-50%,-50%);
-    font-size:18px;
-    color:#ccc;
-    animation: spinAsterisk 1.2s linear infinite;
-    pointer-events:none;
-    z-index:1;
-  }
-  @keyframes spinAsterisk { to { transform:translate(-50%,-50%) rotate(360deg); } }
+
 </style>
 </head>
 <body>
@@ -644,7 +632,7 @@ function showProject(id) {
       wrap.className = 'autopan-wrap';
       const img = document.createElement('img');
       img.src = row[0].src; img.alt = ''; img.decoding = 'sync';
-      img.onload = () => { wrap.classList.add('loaded'); const sp = wrap.querySelector('.img-spinner'); if (sp) sp.remove(); };
+      img.onload = () => wrap.classList.add('loaded');
       wrap.appendChild(img);
       gallery.appendChild(wrap);
       return;
@@ -665,13 +653,9 @@ function showProject(id) {
         wrapWidth = `calc(${pct}% - ${gapShare}px)`;
       }
       wrap.style.width = wrapWidth;
-      const spinner = document.createElement('span');
-      spinner.className = 'img-spinner';
-      spinner.textContent = '*';
-      wrap.appendChild(spinner);
       const img = document.createElement('img');
       img.src = item.src; img.alt = ''; img.decoding = 'sync'; img.loading = 'lazy';
-      img.onload = () => { wrap.classList.add('loaded'); const sp = wrap.querySelector('.img-spinner'); if (sp) sp.remove(); };
+      img.onload = () => wrap.classList.add('loaded');
       wrap.appendChild(img);
       rowEl.appendChild(wrap);
     });
