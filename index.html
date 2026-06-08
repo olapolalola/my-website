@@ -76,8 +76,9 @@
   #prev-btn:disabled, #next-btn:disabled { opacity:0.15; cursor:default; }
   #project-gallery { display:flex; flex-direction:column; gap:4px; }
   .img-row { display:flex; gap:4px; width:100%; align-items:flex-start; }
-  .img-row .img-wrap { flex-shrink:1; min-width:0; overflow:hidden; background:transparent; opacity:0; transition:opacity 0.4s; outline:1px solid #efefef; }
-  .img-row .img-wrap.loaded { opacity:1; }
+  .img-row .img-wrap { position:relative; flex-shrink:1; min-width:0; overflow:hidden; background:transparent; opacity:1; transition:opacity 0.4s; outline:1px solid #efefef; }
+  .img-row .img-wrap img { opacity:0; transition:opacity 0.4s; }
+  .img-row .img-wrap.loaded img { opacity:1; }
   .img-row .img-wrap img {
     width:100%; height:auto; display:block;
     image-rendering: auto;
@@ -156,6 +157,20 @@
     color:#000; border-bottom-color:#000; cursor:pointer;
   }
   #form-status { font-size:9pt; color:#a3a3a3; margin-top:8px; min-height:1em; }
+
+  /* ── Loading spinner ── */
+  .img-wrap::before, .autopan-wrap::before {
+    content: '*';
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    font-size:20px;
+    color:#ccc;
+    animation: spinAsterisk 1.2s linear infinite;
+    pointer-events:none;
+  }
+  .img-wrap.loaded::before, .autopan-wrap.loaded::before { display:none; }
+  @keyframes spinAsterisk { to { transform:translate(-50%,-50%) rotate(360deg); } }
 </style>
 </head>
 <body>
